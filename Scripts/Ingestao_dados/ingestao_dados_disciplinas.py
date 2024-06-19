@@ -14,44 +14,6 @@ last_message_time = time.time()
 dados_disciplinas = []
 
 
-def monta_dados_disciplinas():
-    lista_nome_disciplinas = recupera_dados_disciplinas()
-    count = 0
-    # Função para gerar dados fake usando a biblioteca Faker
-    fake = Faker('pt_BR')
-    for disciplina in lista_nome_disciplinas:
-        count+=1
-        carga_horaria = fake.random_int(min=16, max=92)
-        dados_fake = {
-            "CodigoDisciplina": count,
-            "NomeDisciplina": disciplina,
-            "Tipo": fake.random_element(elements=('Teórica', 'Prática')),
-            "NotaDeCorte": 70,
-            "CargaHorariaPrevista": carga_horaria,
-            "FrequenciaMinima": carga_horaria*0.75
-
-        }
-        json_data = json.dumps(dados_fake)
-        dados_disciplinas.append(json_data)
-            
-    # Cria um DataFrame do Pandas com os dados lidos
-    df = pd.DataFrame(dados_disciplinas)
-    
-    arquivo_local = f'/usr/local/datasets/dados_disciplinas.csv'
-    arquivo_datalake = f'raw/dados_disciplinas/dados_disciplinas.csv'
-    
-    # Salva o DataFrame em um arquivo CSV
-    df.to_csv(arquivo_local, index=False, sep=',')
-
-    # Salva o arquivo no Data lake
-    blob = BlobClient.from_connection_string(conn_str=cadeia_conexao, container_name=nome_container, blob_name=arquivo_datalake)
-    with open(arquivo_local, "rb") as data:
-      blob.upload_blob(data, overwrite = True)
-  
-monta_dados_disciplinas()
-
-
-
 def recupera_dados_disciplinas():
     return [
         'Introdução à Engenharia',
@@ -229,3 +191,42 @@ def recupera_dados_disciplinas():
         'Ética e Legislação em Redes de Computadores',
 
     ]
+
+def monta_dados_disciplinas():
+    lista_nome_disciplinas = recupera_dados_disciplinas()
+    count = 0
+    # Função para gerar dados fake usando a biblioteca Faker
+    fake = Faker('pt_BR')
+    for disciplina in lista_nome_disciplinas:
+        count+=1
+        carga_horaria = fake.random_int(min=16, max=92)
+        tipo = fake.random_element(elements=('Teórica', 'Prática'))
+        frequencia = carga_horaria*0.75
+        dados = '{"CodigoDisciplina": count_, "NomeDisciplina": "disciplina_", "Tipo": "tipo_", "NotaDeCorte": 70, "CargaHorariaPrevista": carga_horaria,"FrequenciaMinima": frequencia_ }'
+        
+        dados = dados.replace('count_', str(count))
+        dados = dados.replace('disciplina_', disciplina)
+        dados = dados.replace('tipo_', tipo)
+        dados = dados.replace('carga_horaria', str(carga_horaria))
+        dados = dados.replace('frequencia_', str(frequencia))
+        
+        json_data = json.loads(dados)
+        dados_disciplinas.append(json_data)
+            
+    # Cria um DataFrame do Pandas com os dados lidos
+    df = pd.DataFrame(dados_disciplinas)
+    
+    arquivo_local = f'/usr/local/datasets/dados_disciplinas.csv'
+    arquivo_datalake = f'raw/dados_disciplinas/dados_disciplinas.csv'
+    
+    # Salva o DataFrame em um arquivo CSV
+    df.to_csv(arquivo_local, index=False, sep=',')
+
+    # Salva o arquivo no Data lake
+    blob = BlobClient.from_connection_string(conn_str=cadeia_conexao, container_name=nome_container, blob_name=arquivo_datalake)
+    with open(arquivo_local, "rb") as data:
+      blob.upload_blob(data, overwrite = True)
+  
+monta_dados_disciplinas()
+
+
