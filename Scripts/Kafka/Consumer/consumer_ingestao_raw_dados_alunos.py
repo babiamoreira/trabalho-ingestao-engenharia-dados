@@ -67,7 +67,7 @@ while True:
             try:
                 json_data = json.loads(data)
                 # Processa a mensagem JSON conforme necessário
-                if all(field in json_data for field in ['Matricula', 'Nome', 'Sexo', 'CadastroGeralPessoa', 'DataNascimento', 'Email', 'Endereco', 'Curso', 'DataIngresso', 'DataPrevistaDeConclusao','DataConclusao','StatusMatricula']):
+                if all(field in json_data for field in ['Matricula', 'Nome', 'Sexo', 'CadastroGeralPessoa', 'DataNascimento', 'Email', 'Endereco','TelefoneCelular', 'Curso', 'DataIngresso', 'DataPrevistaDeConclusao','DataConclusao','StatusMatricula']):
                     dados_alunos.append(json_data)
                 # Atualiza o tempo da última mensagem
                 last_message_time = time.time()
@@ -79,7 +79,7 @@ while True:
             # Atualiza o último offset lido
             update_last_offset(offset)
             
-    if time.time() - last_message_time > 5:  # Verifica se o tempo desde a última mensagem é maior que 5 segundos
+    if time.time() - last_message_time > 60:  # Verifica se o tempo desde a última mensagem é maior que 5 segundos
         print("Não há novas mensagens disponíveis.")
         break
 

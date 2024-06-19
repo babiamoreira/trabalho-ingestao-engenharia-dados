@@ -12,7 +12,7 @@ def gerar_dados_fake():
     # Função para gerar dados fake usando a biblioteca Faker
     fake = Faker('pt_BR')
     dados_fake = []
-    for _ in range(100):
+    for i in range(100):
         data_nascimento = fake.date_between_dates(date_start=datetime(1980, 1, 1), date_end=datetime(2006, 12, 31)).strftime('%d/%m/%Y')
         data_ingresso = datetime.strptime(data_nascimento, '%d/%m/%Y') + relativedelta(years=18)
         codigo_curso = fake.random_int(min=1, max=5)
@@ -32,6 +32,7 @@ def gerar_dados_fake():
             'DataConclusao': calcula_data_conclusao(previsao_conclusao),
             'StatusMatricula': fake.random_element(elements=('Ativo', 'Trancado', 'Cancelado'))
         }
+        print(f'dado_fake_aluno {i} {str(dado_fake)}')
         dados_fake.append(dado_fake)
     
     return dados_fake
@@ -41,6 +42,7 @@ def enviar_dados_kafka(dados):
     for dado in dados:
         producer.send(topic, dado)
     producer.flush()
+    print('dados enviados ao tópico')
 
 def calcula_data_conclusao(data_prevista_conclusao):
     meses_adicionais = random.choice(range(0, 37, 6))
@@ -69,3 +71,6 @@ def get_dados_curso():
         5: {"NomeCurso": "TECNÓLOGO EM REDES DIGITAIS", "Periodos": 4, "CargaHorariaPrevistaPorDisciplina": 48, "DisciplinasPorPeriodo": 6, "MediaDeAlunosPorTurma": 28}
     }
 
+
+dados_fake = gerar_dados_fake()
+enviar_dados_kafka(dados_fake)
