@@ -10,7 +10,7 @@ import time
 server = '10.0.0.4:9092'  # Substitua pelo endereço IP e porta corretos do Apache Kafka
 topic = 'dados-alunos-curso-disciplinas' # Substituia pelo nome do topico
 offset_file = '/usr/local/datasets/kafka_control_topic_offset_curso_disciplinas.txt'
-cadeia_conexao = 'DefaultEndpointsProtocol=https;AccountName=stgaccount199781;AccountKey=bBC01qDML1Z4gycie0bSlr036APLjvPKVsXr9peXFsdNoCSB2uNK7USTGf4gQcLqbsZM9BXg/Wo3+AStLqB3Iw==;EndpointSuffix=core.windows.net'
+cadeia_conexao = ''
 nome_container = 'datalake-dados-faculdade'
 
 # Função para obter o último offset lido a partir de um arquivo
