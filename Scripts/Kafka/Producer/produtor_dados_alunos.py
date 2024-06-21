@@ -44,42 +44,50 @@ def gerar_dados_alunos():
         ano_max = datetime.strptime(previsao_conclusao, '%d/%m/%Y').year
 
         cursos = get_dados_curso()
-        disciplinasPorPeriodo = cursos['DisciplinasPorPeriodo']
-        periodos = cursos['Periodos']
+        disciplinasPorPeriodo = cursos[codigo_curso]['DisciplinasPorPeriodo']
+        periodos = cursos[codigo_curso]['Periodos']
 
-        qtdDisciplinas = disciplinasPorPeriodo*periodos
+        periodoMonth = data_ingresso.month
+        periodoYear = data_ingresso.year
+        for perio in range(periodos):
+            if perio > 0:
+                if periodoMonth > 6:
+                    periodoMonth = periodoMonth - 6
+                    periodoYear += 1
+                else:
+                    periodoMonth += 6
 
-        for d in range(qtdDisciplinas):
-            codigo_disciplina = fake.random_int(min=1, max=173)
-            periodo = str("%02d" % (fake.random_int(min=1, max=12),)) + '/' + str(fake.random_int(min=ano_min, max=ano_max))
-            notaTotal = 0
+            periodo = str("%02d" % (periodoMonth,)) + '/' + str(periodoYear)
+            for d in range(disciplinasPorPeriodo):
+                codigo_disciplina = fake.random_int(min=1, max=173)
+                notaTotal = 0
 
-            for a in range(4):
-                nota = fake.random_int(min=0, max=25)
-                dado_aluno_curso_disciplina_atividade = {
+                for a in range(4):
+                    nota = fake.random_int(min=0, max=25)
+                    dado_aluno_curso_disciplina_atividade = {
+                        'CodigoCurso': codigo_curso,
+                        'CodigoDisciplina': codigo_disciplina,
+                        'Periodo': periodo,
+                        'Matricula': matricula,
+                        'Nota': nota,
+                        'NomeAtividade': fake.random_element(elements=('Exercicio', 'Trabalho', 'Avaliação')) + ' ' + str(a+1),
+                        'ValorAtividade': 25
+                    }
+                    notaTotal += nota
+                    dados_alunos_cursos_disciplinas_atividades.append(dado_aluno_curso_disciplina_atividade)
+
+                
+                dado_aluno_curso_disciplina = {
                     'CodigoCurso': codigo_curso,
                     'CodigoDisciplina': codigo_disciplina,
                     'Periodo': periodo,
                     'Matricula': matricula,
-                    'Nota': nota,
-                    'NomeAtividade': fake.random_element(elements=('Exercicio', 'Trabalho', 'Avaliação')),
-                    'ValorAtividade': 25
+                    'Nota': notaTotal,
+                    'Frequencia': fake.random_int(min=0, max=100),
+                    'Status': fake.random_element(elements=('Aprovado', 'Reprovado', 'Exame Especial')),
+                    'MotivoReprovacao': fake.random_element(elements=('Nota', 'Frequencia'))
                 }
-                notaTotal += nota
-                dados_alunos_cursos_disciplinas_atividades.append(dado_aluno_curso_disciplina_atividade)
-
-            
-            dado_aluno_curso_disciplina = {
-                'CodigoCurso': codigo_curso,
-                'CodigoDisciplina': codigo_disciplina,
-                'Periodo': periodo,
-                'Matricula': matricula,
-                'Nota': notaTotal,
-                'Frequencia': fake.random_int(min=0, max=100),
-                'Status': fake.random_element(elements=('Aprovado', 'Reprovado', 'Exame Especial')),
-                'MotivoReprovacao': fake.random_element(elements=('Nota', 'Frequencia'))
-            }
-            dados_alunos_cursos_disciplinas.append(dado_aluno_curso_disciplina)
+                dados_alunos_cursos_disciplinas.append(dado_aluno_curso_disciplina)
     
     return dados_alunos
 
@@ -87,23 +95,24 @@ def enviar_dados_kafka(dados):
     producer = KafkaProducer(bootstrap_servers=server, value_serializer=lambda v: json.dumps(v).encode('utf-8'))
     for dado in dados:
         producer.send(topic, dado)
+
     producer.flush()
     print('dados enviados ao tópico')
 
 
 def enviar_dados_alunos_cursos_disciplinas_kafka(dados):
-    producer = KafkaProducer(bootstrap_servers=server, value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+    producer_acd = KafkaProducer(bootstrap_servers=server, value_serializer=lambda v: json.dumps(v).encode('utf-8'))
     for dado in dados:
-        producer.send(topic_dados_alunos_cursos_disciplinas, dado)
-    producer.flush()
+        producer_acd.send(topic_dados_alunos_cursos_disciplinas, dado)
+    producer_acd.flush()
     print('dados enviados ao tópico topic_dados_alunos_cursos_disciplinas')
 
 
 def enviar_dados_alunos_cursos_disciplinas_atividade_kafka(dados):
-    producer = KafkaProducer(bootstrap_servers=server, value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+    producer_acda = KafkaProducer(bootstrap_servers=server, value_serializer=lambda v: json.dumps(v).encode('utf-8'))
     for dado in dados:
-        producer.send(topic_dados_alunos_cursos_disciplinas_atividade, dado)
-    producer.flush()
+        producer_acda.send(topic_dados_alunos_cursos_disciplinas_atividade, dado)
+    producer_acda.flush()
     print('dados enviados ao tópico topic_dados_alunos_cursos_disciplinas')
 
 def calcula_data_conclusao(data_prevista_conclusao):

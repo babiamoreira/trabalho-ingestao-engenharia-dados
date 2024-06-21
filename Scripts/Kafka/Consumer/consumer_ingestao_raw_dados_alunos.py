@@ -9,8 +9,8 @@ import time
 # Configuracoes do Kafka
 server = '10.0.0.4:9092'  # Substitua pelo endereço IP e porta corretos do Apache Kafka
 topic = 'dados-alunos' # Substituia pelo nome do topico
-offset_file = '/usr/local/datasets/kafka_control_topic_offset.txt'
-cadeia_conexao = ''
+offset_file = '/usr/local/datasets/kafka_control_topic_offset_dados_alunos.txt'
+cadeia_conexao = 'DefaultEndpointsProtocol=https;AccountName=stgaccount199781;AccountKey=bBC01qDML1Z4gycie0bSlr036APLjvPKVsXr9peXFsdNoCSB2uNK7USTGf4gQcLqbsZM9BXg/Wo3+AStLqB3Iw==;EndpointSuffix=core.windows.net'
 nome_container = 'datalake-dados-faculdade'
 
 # Função para obter o último offset lido a partir de um arquivo
@@ -79,7 +79,7 @@ while True:
             # Atualiza o último offset lido
             update_last_offset(offset)
             
-    if time.time() - last_message_time > 60:  # Verifica se o tempo desde a última mensagem é maior que 5 segundos
+    if time.time() - last_message_time > 5:  # Verifica se o tempo desde a última mensagem é maior que 5 segundos
         print("Não há novas mensagens disponíveis.")
         break
 
